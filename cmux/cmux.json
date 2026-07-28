@@ -1,0 +1,109 @@
+{
+  "$schema": "https://raw.githubusercontent.com/manaflow-ai/cmux/main/web/data/cmux.schema.json",
+  "schemaVersion": 1,
+
+  // Terminal-native cmux. Only the keys below are file-managed; everything else
+  // falls back to your in-app Settings. Reload with: cmux reload-config
+
+  // Follow cmux's own Appearance switch (system/light/dark) instead of forcing
+  // dark, so day/night follows the same toggle that now also drives the
+  // terminal theme (see `cmux themes set` in ghostty config comments) and the
+  // embedded browser below.
+  "app": {
+    "appearance": "system",
+    "openMarkdownInCmuxViewer": true,
+    "minimalMode": false
+  },
+
+  // The seam-killer: paint the sidebar with the terminal's own background.
+  // matchTerminalBackground keeps this in sync automatically, but the
+  // light/dark tint overrides are kept explicit too: dark = Tokyo Night bg
+  // (#1a1b26), light = Tokyo Night Day bg (#e1e2e7), both at full opacity so
+  // native macOS vibrancy never shows through.
+  "sidebarAppearance": {
+    "matchTerminalBackground": true,
+    "tintColor": "#1a1b26",
+    "lightModeTintColor": "#e1e2e7",
+    "darkModeTintColor": "#1a1b26",
+    "tintOpacity": 1.0
+  },
+
+  // Tabs & workspace accents → Tokyo Night, matching the sidebar.
+  // - leftRail keeps the same accent-rail motif the custom sidebar uses.
+  // - selectionColor is the active tab/workspace background: a subtle on-theme
+  //   highlight (#24283b, the same shade the sidebar uses for the selected row).
+  // - notificationBadgeColor matches the sidebar's unread red.
+  // - colors remaps the whole workspace-color picker to Tokyo Night hues so any
+  //   color you tag a workspace/tab with stays in-palette.
+  "workspaceColors": {
+    "indicatorStyle": "leftRail",
+    "selectionColor": "#24283b",
+    "notificationBadgeColor": "#f7768e",
+    "colors": {
+      "Red": "#f7768e",
+      "Crimson": "#db4b4b",
+      "Orange": "#ff9e64",
+      "Amber": "#e0af68",
+      "Olive": "#8da35b",
+      "Green": "#9ece6a",
+      "Teal": "#73daca",
+      "Aqua": "#7dcfff",
+      "Blue": "#7aa2f7",
+      "Navy": "#3d59a1",
+      "Indigo": "#7a88cf",
+      "Purple": "#bb9af7",
+      "Magenta": "#ad8ee6",
+      "Rose": "#ff75a0",
+      "Brown": "#b98a54",
+      "Charcoal": "#414868"
+    }
+  },
+
+  // NOTE: tabBarBackgroundHex/tabBar*/workspaceColors below are flat hex
+  // values in the schema — they can't split by light/dark like
+  // sidebarAppearance can, so they stay pinned to the Tokyo Night (dark)
+  // palette even when the app switches to light via the Appearance toggle
+  // above. Only the sidebar tint, terminal theme, and browser follow the
+  // switch. Revisit if cmux.json ever adds light/dark variants for these.
+
+  // Tab strip: paint it the exact terminal bg so the top edge blends like the
+  // sidebar does (undocumented keys, but cmux reads them; Settings > Terminal >
+  // Tab Bar Font Size maps to terminal.tabBarFontSize).
+  "terminal": {
+    "tabBarBackgroundHex": "#1a1b26",
+    "tabBarFontSize": 12
+  },
+
+  // Per-state surface tab bar styling (the #7458 feature — active in the dev
+  // build; ignored by released cmux until it ships). Selected tab matches the
+  // content bg with a Tokyo Night blue top indicator (replacing the macOS
+  // system-accent highlight); inactive tabs recede a shade with dimmed labels.
+  "tabBarActiveBackground": "#1a1b26",
+  "tabBarActiveForeground": "#c0caf5",
+  "tabBarInactiveBackground": "#16161e",
+  "tabBarInactiveForeground": "#565f89",
+  "tabBarHoverBackground": "#1f2335",
+  "tabBarActiveIndicatorColor": "#7aa2f7",
+  "tabBarActiveIndicatorEdge": "top",
+  "tabBarDividerColor": "#292e42",
+  "tabBarFontFamily": "SF Mono",
+  "tabBarFontWeight": "medium",
+
+  // Font consistency on the surfaces cmux lets us set: everything mono, matching
+  // the SF Mono terminal. (Native tab labels/menus stay the macOS system font —
+  // cmux exposes no family override for AppKit chrome.)
+  "markdown": {
+    "fontFamily": "ui-monospace, 'SF Mono', Menlo, monospace"
+  },
+  "agentChat": {
+    "fonts": {
+      "sansFamily": "ui-monospace, 'SF Mono', Menlo, monospace",
+      "monoFamily": "ui-monospace, 'SF Mono', Menlo, monospace"
+    }
+  },
+
+  // Follow the same appearance switch as everything else.
+  "browser": {
+    "theme": "system"
+  }
+}

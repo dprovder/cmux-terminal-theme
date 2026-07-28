@@ -1,0 +1,30 @@
+# cmux / ghostty — Tokyo Night, tuned to read as a real terminal.
+# The sidebar is set to matchTerminalBackground, so keeping this background
+# solid and opaque is what makes the whole app blend into ghostty with no seam.
+# Reload after edits with:  cmux reload-config
+#
+# Theme (light = TokyoNight Day, dark = TokyoNight) is managed by
+# `cmux themes set` — do not hardcode `theme`/`background`/`foreground` here,
+# or it overrides the light/dark switch. Toggle with:
+#   cmux themes set --light "TokyoNight Day" --dark TokyoNight
+# The switch itself lives in cmux's own Appearance setting (system/light/dark),
+# see app.appearance in cmux.json.
+
+# Solid, fully opaque, no blur. macOS vibrancy/translucency is the "native" tell;
+# a flat opaque slab is the terminal tell.
+background-opacity = 1
+background-blur = false
+
+# Block cursor, no blink — classic terminal.
+cursor-style = block
+cursor-style-blink = false
+
+# Monospace everything. SF Mono ships with macOS; ghostty falls back cleanly
+# if you'd rather swap in JetBrains Mono / Berkeley Mono / etc.
+font-family = "SF Mono"
+font-size = 13
+
+# Tight, even padding — terminal density, not a roomy native panel.
+window-padding-x = 8
+window-padding-y = 6
+window-padding-balance = true
