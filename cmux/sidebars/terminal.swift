@@ -1,15 +1,10 @@
 // terminal.swift — a cmux sidebar that reads like a terminal and FOLLOWS the
-// app's light/dark appearance automatically. No hardcoded hex: it uses the
-// DSL's adaptive tokens (primary/secondary/tertiary/quaternary = auto light/dark,
-// accent = theme accent, and system color names like red/green/cyan). The root
-// paints no background, so `sidebarAppearance.matchTerminalBackground` fills the
-// container with the current terminal bg (which already tracks the toggle).
-// Live workspaces: tap to select, drag to reorder. Hot-reloads on save.
+// app's light/dark appearance automatically (adaptive DSL tokens, no hardcoded
+// hex). Sections: prompt header · running servers · workspace list · footer.
 //   preview in the left sidebar:  cmux sidebar select terminal
 //   open as a pane while editing:  cmux sidebar open terminal
-// NOTE: use STANDARD presentation mode with this sidebar. Minimal mode tries to
-// draw cmux's native workspace controls INTO the sidebar, which a custom sidebar
-// can't render (you get blank gray button backgrounds).
+// NOTE: use STANDARD presentation mode with this sidebar (minimal mode's native
+// controls can't render inside a custom sidebar).
 
 VStack(alignment: .leading, spacing: 0) {
 
@@ -28,6 +23,49 @@ VStack(alignment: .leading, spacing: 0) {
     .padding(10)
 
     Rectangle().fill("quaternary").frame(height: 1).frame(maxWidth: .infinity)
+
+    // ── running servers ─────────────────────────────────────────────────
+    // Any workspace with a detected listening port. Tap a row to jump to the
+    // workspace running that server. Section hides itself when nothing listens.
+    let serverWorkspaces = workspaces.filter { $0.portCount > 0 }
+    if serverWorkspaces.count > 0 {
+        VStack(alignment: .leading, spacing: 1) {
+            HStack(spacing: 6) {
+                Text("◆").foregroundColor("green").font(.caption)
+                Text("servers").foregroundColor("secondary").fontDesign(.monospaced).font(.caption)
+                Spacer()
+                Text("\(serverWorkspaces.count)⇡")
+                    .foregroundColor("tertiary").fontDesign(.monospaced).font(.caption)
+            }
+            .padding(.horizontal, 10)
+            .padding(.top, 8)
+            .padding(.bottom, 3)
+
+            for w in serverWorkspaces {
+                for p in w.ports {
+                    Button(action: { cmux("workspace.select", workspace_id: w.id) }) {
+                        HStack(spacing: 8) {
+                            Text(w.selected ? "▸" : "·")
+                                .foregroundColor(w.selected ? "green" : "tertiary")
+                                .fontDesign(.monospaced).font(.caption)
+                            Text(":\(p)")
+                                .foregroundColor("cyan").fontDesign(.monospaced).font(.caption).bold()
+                            Text(w.title)
+                                .foregroundColor("secondary").fontDesign(.monospaced).font(.caption).lineLimit(1)
+                            Spacer()
+                        }
+                        .padding(.vertical, 3)
+                        .padding(.horizontal, 10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(w.selected ? "quaternary" : "clear")
+                        .cornerRadius(4)
+                    }
+                }
+            }
+        }
+        .padding(.bottom, 6)
+        Rectangle().fill("quaternary").frame(height: 1).frame(maxWidth: .infinity)
+    }
 
     // ── live, tappable, drag-to-reorder workspace list ──────────────────
     ScrollView {
