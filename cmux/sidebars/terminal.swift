@@ -1,13 +1,13 @@
 // terminal.swift — a terminal-styled cmux sidebar that FOLLOWS the app's
-// light/dark appearance (adaptive DSL tokens, no hardcoded hex). Each row is a
-// single button (tap = select the workspace) surfacing the full snapshot:
-// title · PR · description · git branch/dirty · remote · running-server ports ·
-// progress · tab count, and the selected workspace's tab list.
+// light/dark appearance (adaptive DSL tokens, no hardcoded hex). FLAT list: each
+// workspace is a single-button row; the selected workspace's tabs (surfaces) are
+// their own single-button rows right below it, indented. Tapping a workspace
+// selects it; tapping a tab focuses that exact surface. Single-button rows stay
+// compact (a multi-child VStack row would stretch — see SIDEBAR-API.md), which is
+// why tabs are sibling rows, not nested children.
 //   preview:  cmux sidebar select terminal      edit-in-pane:  cmux sidebar open terminal
-// NOTE: use STANDARD presentation mode. Progress is shown as TEXT, not a
-// ProgressView — a ProgressView has no intrinsic height cap, so in a VStack it
-// expands to fill and forces every row to the same tall height. Keep every row
-// child height-bounded (Text/HStack of Text) to preserve terminal density.
+// NOTE: use STANDARD presentation mode. Trade-off: no drag-reorder (a flat loop,
+// not Reorderable) in exchange for per-surface clickability.
 
 VStack(alignment: .leading, spacing: 0) {
 
@@ -24,10 +24,12 @@ VStack(alignment: .leading, spacing: 0) {
 
     Rectangle().fill("quaternary").frame(height: 1).frame(maxWidth: .infinity)
 
-    // ── live, tappable, drag-to-reorder workspace list ──────────────────
+    // ── flat list: workspace rows + (for the selected one) tab rows ─────
     ScrollView {
-        VStack(alignment: .leading, spacing: 1) {
-            Reorderable(workspaces, move: "workspace.reorder") { w in
+        LazyVStack(alignment: .leading, spacing: 16) {
+            for w in workspaces {
+
+                // workspace row — single button → select
                 Button(action: { cmux("workspace.select", workspace_id: w.id) }) {
                     HStack(spacing: 8) {
                         Text(w.unread > 0 ? "●" : (w.selected ? "▸" : "○"))
@@ -35,7 +37,6 @@ VStack(alignment: .leading, spacing: 0) {
                             .foregroundColor(w.unread > 0 ? "red" : (w.selected ? "green" : "tertiary"))
 
                         VStack(alignment: .leading, spacing: 2) {
-                            // title + PR badge
                             HStack(spacing: 6) {
                                 Text(w.title)
                                     .foregroundColor(w.selected ? "primary" : "secondary")
@@ -46,13 +47,9 @@ VStack(alignment: .leading, spacing: 0) {
                                         .fontDesign(.monospaced).font(.caption2)
                                 }
                             }
-
-                            // detail text
                             if let d = w.description {
                                 Text(d).foregroundColor("tertiary").fontDesign(.monospaced).font(.caption2).lineLimit(1)
                             }
-
-                            // branch · dirty · remote · ports · tabs · progress (all leaf text)
                             HStack(spacing: 8) {
                                 if let b = w.branch {
                                     HStack(spacing: 3) {
@@ -66,26 +63,11 @@ VStack(alignment: .leading, spacing: 0) {
                                         .foregroundColor(r.connected ? "green" : "tertiary")
                                         .fontDesign(.monospaced).font(.caption).lineLimit(1)
                                 }
-                                for p in w.ports {
-                                    Text(":\(p)").foregroundColor("green").fontDesign(.monospaced).font(.caption)
-                                }
                                 if w.tabCount > 0 {
                                     Text("\(w.tabCount)⊞").foregroundColor("tertiary").fontDesign(.monospaced).font(.caption)
                                 }
                                 if let pg = w.progress {
                                     Text("\(Int(pg.value * 100))%").foregroundColor("accent").fontDesign(.monospaced).font(.caption)
-                                }
-                            }
-
-                            // selected workspace: tab (surface) list for reference
-                            if w.selected {
-                                for t in w.tabs.prefix(8) {
-                                    HStack(spacing: 5) {
-                                        Text(t.focused ? "▸" : "·")
-                                            .foregroundColor(t.focused ? "accent" : "tertiary").fontDesign(.monospaced).font(.caption2)
-                                        Text(t.title)
-                                            .foregroundColor(t.focused ? "secondary" : "tertiary").fontDesign(.monospaced).font(.caption2).lineLimit(1)
-                                    }
                                 }
                             }
                         }
@@ -98,13 +80,34 @@ VStack(alignment: .leading, spacing: 0) {
                                 .padding(4).background("red").cornerRadius(6)
                         }
                     }
-                    .padding(8)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(w.selected ? "quaternary" : "clear")
                     .overlay(alignment: .leading) {
                         Rectangle().fill(w.selected ? "accent" : "clear").frame(width: 3)
                     }
                     .cornerRadius(6)
+                }
+
+                // tab rows (selected workspace only) — each a single button → focus.
+                // Sibling rows in the flat list, NOT nested, so they stay compact.
+                if w.selected {
+                    for t in w.tabs.prefix(10) {
+                        Button(action: { cmux("surface.focus", surface_id: t.id) }) {
+                            HStack(spacing: 6) {
+                                Text(t.focused ? "▸" : "·")
+                                    .foregroundColor(t.focused ? "accent" : "tertiary").fontDesign(.monospaced).font(.caption)
+                                Text(t.title)
+                                    .foregroundColor(t.focused ? "primary" : "secondary").fontDesign(.monospaced).font(.caption).lineLimit(1)
+                                for p in t.ports {
+                                    Text(":\(p)").foregroundColor("green").fontDesign(.monospaced).font(.caption2)
+                                }
+                                Spacer()
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(t.focused ? "quaternary" : "clear")
+                            .cornerRadius(5)
+                        }
+                    }
                 }
             }
         }
