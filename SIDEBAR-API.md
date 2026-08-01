@@ -152,6 +152,18 @@ Fix: render progress as text (`Text("\(Int(pg.value * 100))%")`) or a text bar,
 and generally keep every row child height-bounded (`Text`, `HStack` of `Text`).
 This is why a rich row can silently blow up the whole list's density.
 
+## Layout gotcha: row padding under LazyVStack, and clickable sub-rows
+
+- **`.padding()` on a row's outer content inside a `LazyVStack` can balloon the
+  row height.** If rows go giant, remove the outer `.padding(...)` and add spacing
+  via the `LazyVStack(spacing:)` parameter instead (a container gap, not row padding).
+- **Multiple tap targets in one row don't stay compact.** A row that is a single
+  `Button` clamps its height; a `VStack` row holding a button plus sibling elements
+  gets stretched. To make per-item things clickable (e.g. each tab/surface), don't
+  nest them — emit each as its **own single-`Button` row** in a flat list
+  (`for w in workspaces { workspaceButton; if w.selected { for t in w.tabs { tabButton } } }`).
+  Cost: you can't wrap that in `Reorderable`, so you lose drag-to-reorder.
+
 ## Not yet supported
 
 `@State` and controls needing it (`TextField` `Toggle` `Slider` `Picker`); `switch`;
