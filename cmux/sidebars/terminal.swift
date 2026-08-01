@@ -26,7 +26,7 @@ VStack(alignment: .leading, spacing: 0) {
 
     // ── flat list: workspace rows + (for the selected one) tab rows ─────
     ScrollView {
-        LazyVStack(alignment: .leading, spacing: 16) {
+        LazyVStack(alignment: .leading, spacing: 8) {
             for w in workspaces {
 
                 // workspace row — single button → select
@@ -80,7 +80,7 @@ VStack(alignment: .leading, spacing: 0) {
                                 .padding(4).background("red").cornerRadius(6)
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
                     .background(w.selected ? "quaternary" : "clear")
                     .overlay(alignment: .leading) {
                         Rectangle().fill(w.selected ? "accent" : "clear").frame(width: 3)
@@ -94,6 +94,7 @@ VStack(alignment: .leading, spacing: 0) {
                     for t in w.tabs.prefix(10) {
                         Button(action: { cmux("surface.focus", surface_id: t.id) }) {
                             HStack(spacing: 6) {
+                                Rectangle().fill("clear").frame(width: 14, height: 10)
                                 Text(t.focused ? "▸" : "·")
                                     .foregroundColor(t.focused ? "accent" : "tertiary").fontDesign(.monospaced).font(.caption)
                                 Text(t.title)
@@ -103,9 +104,7 @@ VStack(alignment: .leading, spacing: 0) {
                                 }
                                 Spacer()
                             }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(t.focused ? "quaternary" : "clear")
-                            .cornerRadius(5)
+                            .frame(maxWidth: .infinity, minHeight: 18, alignment: .leading)
                         }
                     }
                 }
