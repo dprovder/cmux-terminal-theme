@@ -140,6 +140,18 @@ Full list: `cmux capabilities` (JSON `methods`) or `cmux docs api`.
 
 ---
 
+## Layout gotcha: no unbounded-height children in list rows
+
+A `VStack` gives **equal height to flexible children**, so a single child with no
+intrinsic height cap will expand to fill and force *every* row in the list to the
+same tall height (content top-aligned, big empty gap below). The main offender is
+**`ProgressView(value:)`** — it has no height cap. Symptoms: rows look massively
+over-spaced even though the content is small.
+
+Fix: render progress as text (`Text("\(Int(pg.value * 100))%")`) or a text bar,
+and generally keep every row child height-bounded (`Text`, `HStack` of `Text`).
+This is why a rich row can silently blow up the whole list's density.
+
 ## Not yet supported
 
 `@State` and controls needing it (`TextField` `Toggle` `Slider` `Picker`); `switch`;
